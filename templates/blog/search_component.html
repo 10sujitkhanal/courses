@@ -1,0 +1,6 @@
+<div class="border rounded mb-6">
+        <form action="{% url 'search' %}" method="GET">
+            <input class="form-control form-control-sm border-0 pe-0" type="search" placeholder="Search" name="q" value="{{request.GET.q}}">
+
+        </form>
+</div>

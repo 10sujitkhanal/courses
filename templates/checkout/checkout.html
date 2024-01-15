@@ -1,0 +1,172 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load course_tags %}
+{% block content %}
+<script src="https://unpkg.com/khalti-checkout-web@latest/dist/khalti-checkout.iffe.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<header class="py-3" style="background-image: none;">
+    <div class="container text-center py-xl-2">
+        <h1 class="display-4 fw-semi-bold mb-0">Course Checkout</h1>
+    </div>
+    <!-- Img -->
+    <img class="d-none img-fluid" src="...html" alt="...">
+</header>
+
+<div class="container pb-6 pb-xl-10">
+    <form name="checkout" method="post" action="#" class="checkout woocommerce-checkout" id="payment-form">
+        {% csrf_token %}
+        <div class="col2-set" id="customer_details">
+            <div class="col-1">
+                <div class="woocommerce-billing-fields">
+                    <h3>Billing details</h3>
+                    <div class="woocommerce-billing-fields__field-wrapper">
+                        <p class="form-row form-row-first validate-required woocommerce-invalid woocommerce-invalid-required-field" id="first_name_field" data-priority="10">
+                            <label for="first_name" class="">First name <abbr class="required" title="required">*</abbr></label>
+                            <input type="text" class="input-text " name="first_name" id="first_name" placeholder="" value="{{request.user.first_name}}" autofocus="autofocus" required>
+                        </p>
+                        <p class="form-row form-row-last validate-required" id="last_name_field" data-priority="20">
+                            <label for="last_name" class="">Last name <abbr class="required" title="required">*</abbr></label>
+                            <input type="text" class="input-text " name="last_name" id="last_name" placeholder="" value="{{request.user.last_name}}" required>
+                        </p>
+                        <p class="form-row form-row-first validate-required validate-phone" id="billing_phone_field" data-priority="100">
+                            <label for="phone" class="">Phone <abbr class="required" title="required">*</abbr></label>
+                            <input type="tel" class="input-text" name="phone" id="phone" placeholder="" value="{{request.user.phone}}" autocomplete="tel" required>
+                        </p>
+                        <p class="form-row form-row-last validate-required" id="email_field" data-priority="20">
+                            <label for="email" class="">Email <abbr class="required" title="required">*</abbr></label>
+                            <input type="text" class="input-text " name="email" id="email" placeholder="" value="{{request.user.email}}" readonly required>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-2">
+                <div class="woocommerce-shipping-fields"></div>
+                <div class="woocommerce-additional-fields">
+                    <h3>Additional information <abbr class="required" title="required">*</abbr></h3>
+                    <div class="woocommerce-additional-fields__field-wrapper">
+                        <p class="form-row notes" id="comments_field" data-priority=""><label for="order_comments" class="">Order notes</label><textarea name="order_comments" class="input-text " id="order_comments" placeholder="Notes about your order, e.g. special notes for delivery." rows="7" cols="5" required></textarea></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="order_review" class="woocommerce-checkout-review-order">
+            <div class="woocommerce-checkout-review-order-inner">
+                <h3 id="order_review_heading">Your order</h3>
+                <table class="shop_table woocommerce-checkout-review-order-table">
+                    <thead>
+                        <tr>
+                            <th class="product-name">Course</th>
+                            <th class="product-total">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="cart_item">
+                            <td class="product-name">
+                                {{course.title}}
+                            </td>
+                            <td class="product-total">
+                                <span class="woocommerce-Price-amount amount">
+                                    <span class="woocommerce-Price-currencySymbol">Rs</span>
+                                    {{ course.price }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="cart-subtotal">
+                            <th>Subtotal</th>
+                            <td><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol"></span>{{course.discount}}%</span></td>
+                        </tr>
+
+                        <tr class="order-total">
+                            <th>Total</th>
+                            <td><strong><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">Rs</span>{% discount_calculation course.price course.discount %}</span></strong> </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div id="payment" class="woocommerce-checkout-payment">
+                <ul class="wc_payment_methods payment_methods methods">
+                    <li class="wc_payment_method payment_method_cod">
+                        <input id="payment_method_cod" type="radio" class="input-radio" name="payment_method" value="KHALTI" checked="checked" data-order_button_text="">
+
+                        <label for="payment_method_khalti">Khalti </label>
+                    </li>
+                </ul>
+                <div class="form-row place-order">
+                    <button id="s" type="submit" class="btn btn-primary btn-block">Pay with Khalti</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+<script>
+    function verifyPayment(payload) {
+        var form = $('#payment-form');
+        
+        data = {
+            'payload':JSON.stringify(payload),
+            'form_data':form.serialize()
+        }
+        $.ajax({
+            url: "{% url 'checkout' course.slug %}",
+            type: "POST",
+            data: data,
+            dataType: 'json',
+            success: function (response) { window.location.href = '/payment_success/'+response['payment']},
+            error: function (error) { alert(error['message']) }
+        });
+    }
+
+    var productUrl = window.location.href+"/courses/{{course.slug}}/";
+
+    
+    $("#payment-form").submit(function(e) {
+        e.preventDefault();
+        payment_method = $('input[name="payment_method"]:checked').val();
+        var amount = {% discount_calculation course.price course.discount %} * 100
+        if(payment_method == 'KHALTI')
+        {
+            var config = {
+                // replace the publicKey with yours
+                "publicKey": "test_public_key_bf80211fe4504f2184f6fcfa1f56bbf1",
+                "productIdentity": "{{course.slug}}",
+                "productName": "{{course.title}}",
+                "productUrl": productUrl,
+                "paymentPreference": [
+                        "MOBILE_BANKING",
+                        "KHALTI",
+                        "EBANKING",
+                        "CONNECT_IPS",
+                        "SCT",
+                    ],
+                "eventHandler": {
+                    onSuccess(payload) {
+                        // hit merchant api for initiating verfication
+                        console.log(payload);
+                        verifyPayment(payload)
+                    },
+                    onError(error) {
+                        alert("Error");
+                        console.log(error);
+                    },
+                    onClose() {
+                        alert("Error");
+        
+                        console.log('widget is closing');
+                    }
+                }
+            };
+            var checkout = new KhaltiCheckout(config);
+            checkout.show({ amount: 1000 });
+        }
+        else if(payment_method=="CARD"){
+            alert("SUJIT")
+        }
+    });
+</script>
+</div>
+{% endblock %}

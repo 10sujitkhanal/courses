@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load course_tags %}
+{% block content %}
+<div class="container py-8 pt-lg-11">
+    <div class="row">
+        <div class="col-xl-8 mx-auto">
+            <h1 class="text-capitalize">{{post.title}}</h1>
+
+            <div class="d-md-flex align-items-center">
+                <div class="border rounded-circle d-inline-block mb-4 mb-md-0 me-4">
+                    <div class="p-1">
+                        <img src="https://sixseasonsreview.com/wp-content/uploads/2016/10/default.png" alt="..." class="rounded-circle" width="52" height="52">
+                    </div>
+                </div>
+
+                <div class="mb-4 mb-md-0">
+                    <a href="#" class="d-block"><h6 class="mb-0">{{post.author.first_name}} {{post.author.last_name}}</h6></a>
+                    <span class="font-size-sm">{{post.post_date | date:'d F Y'}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-8 sk-thumbnail img-ratio-7">
+    <img src="{{post.img.url}}" alt="..." class="img-fluid">
+</div>
+
+<div class="container">
+    <div class="row mb-8 mb-md-12">
+        <div class="col-xl-8 mx-auto">
+            <h3 class="">Course Description</h3>
+            <p class="mb-6 line-height-md">{{post.body | safe}}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
