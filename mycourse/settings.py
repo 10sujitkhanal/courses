@@ -87,10 +87,10 @@ WSGI_APPLICATION = 'mycourse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'zqixtwjb', 
-        'USER': 'zqixtwjb',
-        'PASSWORD': 'I8j6UTpxdL98nQU93oS4H1WYSnGmCBSb',
-        'HOST': 'satao.db.elephantsql.com', 
+        'NAME': 'ebxuemzu', 
+        'USER': 'ebxuemzu',
+        'PASSWORD': 'IQKQ5swE7VMR2lfGflSJPOjIsvmzJLY-',
+        'HOST': 'john.db.elephantsql.com', 
         'PORT': '5432',
     }
 }
